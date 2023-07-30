@@ -1,11 +1,14 @@
-service: ${self:custom.settings.serviceName}
+org: proclame
+app: image-handler-imgix-alt
+service: image-handler-imgix-alt
+variablesResolutionMode: 20210326
 
 provider:
   name: aws
   runtime: nodejs14.x
-  timeout: 10
+  timeout: 28
   stage: ${opt:stage,'dev'}
-  region: ${self:custom.settings.region}
+  region: 'eu-central-1'
   iam:
     role:
       statements:
@@ -14,8 +17,10 @@ provider:
             - "s3:GetObject"
           Resource: "arn:aws:s3:::${self:custom.settings.environment.SOURCE_BUCKET}/*"
   apiGateway:
+    shouldStartNameWithService: true
     binaryMediaTypes:
       - '*/*'
+  lambdaHashingVersion: "20201221"
 
 layers:
   sharp:
@@ -24,7 +29,7 @@ layers:
     package:
       include:
         - node_modules/**
-    description: sharp@0.27.2
+    description: sharp@0.32.4
     compatibleRuntimes:
       - nodejs14.x
     licenseInfo: Apache License 2.0
@@ -58,7 +63,7 @@ resources:
                 Fn::Join:
                   - "."
                   - - Ref: ApiGatewayRestApi
-                    - execute-api.${self:custom.settings.region}.amazonaws.com
+                    - execute-api.${self:provider.region}.amazonaws.com
               OriginPath: "/${self:provider.stage}"
               CustomOriginConfig:
                 HTTPPort: 80
@@ -94,6 +99,7 @@ resources:
         'Fn::GetAtt': [ CloudFrontDistribution, DomainName ]
 functions:
   index:
+    memorySize: 5120
     package:
       individually: true
       exclude:
@@ -117,7 +123,7 @@ custom:
   settingsFilePath: ${opt:settings,'./settings.yml'}
   settings: ${file(${self:custom.settingsFilePath}):stages.${self:provider.stage}}
   serverless-offline:
-    httpPort: ${self:custom.settings.offlinePort}
+    httpPort: 3003
     noPrependStageInUrl: true
 plugins:
   - serverless-offline
