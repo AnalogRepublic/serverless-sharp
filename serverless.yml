@@ -57,6 +57,7 @@ resources:
                 - 'Accept'
               QueryString: true
           Enabled: true
+          HttpVersion: 'http2and3'
           Origins:
             - Id: ApiGateway
               DomainName:

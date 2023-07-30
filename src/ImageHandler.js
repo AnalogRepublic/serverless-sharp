@@ -37,8 +37,7 @@ class ImageHandler {
     if (Object.keys(this.request.edits).length) {
       try {
         // We're calling rotate on this immediately in order to ensure metadata for rotation doesn't get lost
-        let pipeline = this.request.sharpObject.rotate()
-
+        const pipeline = this.request.sharpObject.rotate()
 
         await this.applyEdits(pipeline, this.request.edits)
         await this.applyOptimizations(pipeline)
