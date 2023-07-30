@@ -22,11 +22,20 @@ exports.apply = (image, edits) => {
  * @param {number} val
  */
 exports.bri = (image, val) => {
-  // TODO: This is wrong! Brightness in imgix is -200-200 for SOME REASON??
-  // Also, it doesn't scale nicely to Sharp. Sharp doesn't go completely black
-  image.modulate({
-    brightness: val
-  })
+  const adjustments = {
+    brigtness: 1,
+    lightness: 0
+  }
+  val = val < -100 ? -100 : val
+  val = val > 100 ? 100 : val
+  if (val < 0) {
+    adjustments.brigtness = (val + 100) / 100
+  }
+  if (val > 0) {
+    adjustments.lightness = val
+  }
+
+  image.modulate(adjustments)
 }
 
 /**

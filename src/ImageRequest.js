@@ -33,15 +33,15 @@ class ImageRequest {
     this.originalMetadata = await this.sharpObject.metadata()
     this.headers = this.event.headers
 
-    const queryParams = this.normalizeQueryParams(this.event.queryStringParameters)
+    const queryParams = this.normalizeQueryParams(this.event.queryStringParameters ?? {})
 
     this.schema = schemaParser.getSchemaForQueryParams(queryParams)
     this.edits = schemaParser.normalizeAndValidateSchema(this.schema, queryParams)
   }
 
-  getAutoFormat() {
+  getAutoFormat () {
     const coercibleFormats = ['jpg', 'png', 'webp', 'avif', 'jpeg', 'tiff']
-    const autoParam = this.event.multiValueQueryStringParameters.auto
+    const autoParam = this.event.multiValueQueryStringParameters !== null ? this.event.multiValueQueryStringParameters.auto : null
     const specialOutputFormats = eventParser.getAcceptedImageFormatsFromHeaders(this.headers)
 
     if (

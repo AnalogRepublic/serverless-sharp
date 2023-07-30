@@ -38,7 +38,11 @@ exports.apply = async (image, edits) => {
         await this.scaleCrop(image, w.processedValue, h.processedValue, crop.processedValue, edits['fp-x'].processedValue, edits['fp-y'].processedValue, false)
         break
       case 'fill':
-        await this.fill(image, edits.fill.processedValue, w.processedValue, h.processedValue, edits['fill-color'].processedValue)
+        if (edits.fill.processedValue === 'blur') {
+          await this.fillWithBlur(image, w.processedValue, h.processedValue)
+        } else {
+          await this.fill(image, edits.fill.processedValue, w.processedValue, h.processedValue, edits['fill-color'].processedValue)
+        }
         break
       case 'scale':
         this.scale(image, w.processedValue, h.processedValue)
@@ -137,6 +141,23 @@ exports.fill = async (image, mode, width = null, height = null, color = null) =>
     }
   }
   image.resize(resizeParams)
+}
+
+exports.fillWithBlur = async (image, width, height, blur = 6) => {
+  const image2 = image.clone()
+  const resBuffer = await image2.resize({
+    width: width,
+    height: height,
+    fit: 'inside'
+  }).toBuffer()
+
+  await image.resize({
+    width: width,
+    height: height,
+    position: 'top',
+    fit: 'cover'
+  }).blur(75)
+  image.composite([{ input: resBuffer }])
 }
 
 /**

@@ -37,7 +37,9 @@ class ImageHandler {
     if (Object.keys(this.request.edits).length) {
       try {
         // We're calling rotate on this immediately in order to ensure metadata for rotation doesn't get lost
-        const pipeline = this.request.sharpObject.rotate()
+        let pipeline = this.request.sharpObject.rotate()
+
+
         await this.applyEdits(pipeline, this.request.edits)
         await this.applyOptimizations(pipeline)
         bufferImage = await pipeline.toBuffer()
@@ -144,9 +146,9 @@ class ImageHandler {
         })
       }
     } else if (fm === 'png') {
-        image.png({
-          quality: quality
-        })
+      image.png({
+        quality: quality
+      })
     } else if (fm === 'webp') {
       const options = {
         quality: quality

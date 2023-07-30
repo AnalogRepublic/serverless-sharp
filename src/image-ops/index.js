@@ -1,11 +1,12 @@
 const size = require('./size')
 const stylize = require('./stylize')
+const adjustment = require('./adjustment')
 const settings = require('../helpers/settings')
 
 const operationsByCategory = {
   size: size.apply,
-  stylize: stylize.apply
-  // adjustment: adjustment.apply
+  stylize: stylize.apply,
+  adjustment: adjustment.apply
 }
 
 /**
