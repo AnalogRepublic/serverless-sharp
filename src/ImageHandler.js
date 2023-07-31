@@ -1,8 +1,3 @@
-const sharp = require('sharp')
-const fs = require('fs')
-const path = require('path')
-const { spawnSync } = require('child_process')
-
 const settings = require('./helpers/settings')
 const ImageRequest = require('./ImageRequest')
 const imageOps = require('./image-ops')
@@ -87,7 +82,7 @@ class ImageHandler {
   /**
    * Applies image modifications to the original image based on edits
    * specified in the ImageRequest.
-   * @param {sharp} originalImage - The original image.
+   * @param {Sharp} image - The original image.
    * @param {Object} edits - The edits to be made to the original image.
    */
   async applyEdits (image, edits) {
@@ -98,14 +93,12 @@ class ImageHandler {
   /**
    * TODO: Move me out of here
    * @param image
-   * @param edits
-   * @param headers
    * @returns {Promise<Sharp>}
    */
   async applyOptimizations (image) {
     // const minColors = 128 // arbitrary number
     // const maxColors = 256 * 256 * 256 // max colors in RGB color space
-    const { edits, headers } = this.request
+    const { edits } = this.request
     const { auto } = edits
 
     let autoVals = auto.processedValue
@@ -124,16 +117,15 @@ class ImageHandler {
       }
     }
 
-    let fm = edits.fm.processedValue
+    const fm = edits.fm.processedValue
 
     if (autoVals.includes('compress')) {
       quality = settings.getSetting('DEFAULT_COMPRESS_QUALITY')
     }
 
-
     // adjust quality based on file type
     if (fm === 'jpg' || fm === 'jpeg') {
-      if (autoVals.includes('compress') && quality < 100 && edits.q !== undefined) {
+      if (autoVals.includes('compress') && quality < 100) {
         image.jpeg({
           quality: quality,
           mozjpeg: true
@@ -163,7 +155,12 @@ class ImageHandler {
       if ('lossless' in edits && edits.lossless.processedValue === true) {
         options.lossless = true
       }
-      image.avif(options)
+
+      if (this.request.originalMetadata.width > 2000 || this.request.originalMetadata.height > 2000) {
+        image.webp(options)
+      } else {
+        image.avif(options)
+      }
     } else {
       image.toFormat(fm)
     }
