@@ -41,6 +41,7 @@ class ImageRequest {
 
   getAutoFormat () {
     const coercibleFormats = ['jpg', 'png', 'webp', 'avif', 'jpeg', 'tiff']
+
     const autoParam = this.event.multiValueQueryStringParameters !== null ? this.event.multiValueQueryStringParameters.auto : null
     const specialOutputFormats = eventParser.getAcceptedImageFormatsFromHeaders(this.headers)
 

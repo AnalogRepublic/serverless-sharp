@@ -100,7 +100,7 @@ resources:
         'Fn::GetAtt': [ CloudFrontDistribution, DomainName ]
 functions:
   index:
-    memorySize: 5120
+    memorySize: 10240
     package:
       individually: true
       exclude:
