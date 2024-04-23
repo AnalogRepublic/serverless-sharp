@@ -1,5 +1,6 @@
 const ImageRequest = require('./ImageRequest.js')
 const ImageHandler = require('./ImageHandler.js')
+const CacheHandler = require('./CacheHandler.js')
 const security = require('./helpers/security')
 const settings = require('./helpers/settings')
 
@@ -14,6 +15,23 @@ exports.handler = async (event, context, callback) => {
   try {
     const imageRequest = new ImageRequest(event)
     await imageRequest.process() // This is important! We need to load the metadata off the image and check the format
+
+    const cacheHandler = new CacheHandler()
+    const CacheFile = await cacheHandler.checkCacheExists(imageRequest.cacheFilename)
+    if(CacheFile !== false) {
+      console.log(CacheFile)
+      console.log(getResponseHeaders(CacheFile))
+      console.log(CacheFile.Body.toString('base64'))
+      const response = {
+        statusCode: 200,
+        headers: getResponseHeaders(CacheFile, null),
+        body: CacheFile.Body.toString('base64'),
+        isBase64Encoded: true
+      }
+      if (context && context.succeed) { context.succeed(response) }
+      return response
+    }
+
     const imageHandler = new ImageHandler(imageRequest)
 
     const processedRequest = await imageHandler.process()
@@ -21,6 +39,8 @@ exports.handler = async (event, context, callback) => {
     const originalImageSize = imageRequest.originalImageSize
     const newImageSize = processedRequest.ContentLength
     const sizeDifference = newImageSize - originalImageSize
+
+    await cacheHandler.putCacheFile(imageRequest.cacheFilename, processedRequest)
 
     if (sizeDifference > 0) {
       console.warn('Output size was larger than input size', { newImageSize, originalImageSize, sizeDifference })
@@ -93,4 +113,16 @@ const beforeHandleRequest = (event) => {
   }
 
   return result
+}
+
+String.prototype.hashCode = function() {
+  var hash = 0,
+    i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr = this.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
 }

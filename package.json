@@ -24,5 +24,8 @@
     "serverless-offline": "^12.0.0",
     "sharp": "^0.32.4",
     "standard": "^17.1.0"
+  },
+  "dependencies": {
+    "object-hash": "^3.0.0"
   }
 }

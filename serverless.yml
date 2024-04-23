@@ -5,7 +5,7 @@ variablesResolutionMode: 20210326
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   timeout: 28
   stage: ${opt:stage,'dev'}
   region: 'eu-central-1'
@@ -15,6 +15,7 @@ provider:
         - Effect: "Allow"
           Action:
             - "s3:GetObject"
+            - "s3:PutObject"
           Resource: "arn:aws:s3:::${self:custom.settings.environment.SOURCE_BUCKET}/*"
   apiGateway:
     shouldStartNameWithService: true
@@ -31,7 +32,7 @@ layers:
         - node_modules/**
     description: sharp@0.32.4
     compatibleRuntimes:
-      - nodejs14.x
+      - nodejs16.x
     licenseInfo: Apache License 2.0
     retain: false
 
@@ -100,7 +101,7 @@ resources:
         'Fn::GetAtt': [ CloudFrontDistribution, DomainName ]
 functions:
   index:
-    memorySize: 10240
+    memorySize: 5120
     package:
       individually: true
       exclude:

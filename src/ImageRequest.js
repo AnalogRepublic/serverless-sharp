@@ -5,6 +5,7 @@ const sharp = require('sharp')
 const HashException = require('./errors/HashException')
 const settings = require('./helpers/settings')
 const S3Exception = require('./errors/S3Exception')
+const objectHash = require('./helpers/object_hash');
 
 class ImageRequest {
   constructor (event) {
@@ -34,6 +35,8 @@ class ImageRequest {
     this.headers = this.event.headers
 
     const queryParams = this.normalizeQueryParams(this.event.queryStringParameters ?? {})
+    const eTag = this.originalImageObject.ETag
+    this.cacheFilename = eTag.replace(/"/,'').replace(/"/,'') + '-' + objectHash(queryParams) + '.' + queryParams.fm
 
     this.schema = schemaParser.getSchemaForQueryParams(queryParams)
     this.edits = schemaParser.normalizeAndValidateSchema(this.schema, queryParams)

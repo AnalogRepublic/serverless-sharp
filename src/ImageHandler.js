@@ -73,6 +73,7 @@ class ImageHandler {
 
     return {
       CacheControl: originalImageObject.CacheControl,
+      BufferImage: bufferImage,
       Body: bufferImage.toString('base64'),
       ContentType: contentType,
       ContentLength: Buffer.byteLength(bufferImage, 'base64')
