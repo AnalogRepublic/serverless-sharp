@@ -1,7 +1,6 @@
 org: proclame
 app: image-handler-imgix-alt
 service: image-handler-imgix-alt
-variablesResolutionMode: 20210326
 
 provider:
   name: aws
@@ -9,6 +8,8 @@ provider:
   timeout: 28
   stage: ${opt:stage,'dev'}
   region: 'eu-central-1'
+  logs:
+    restApi: false
   iam:
     role:
       statements:
@@ -21,18 +22,18 @@ provider:
     shouldStartNameWithService: true
     binaryMediaTypes:
       - '*/*'
-  lambdaHashingVersion: "20201221"
 
 layers:
   sharp:
     path: lambdaLayers/SharpLayer # required, path to layer contents on disk
     name: ${self:provider.stage}-sharp # optional, Deployed Lambda layer name
     package:
-      include:
+      patterns:
         - node_modules/**
-    description: sharp@0.32.4
+    description: sharp@0.33.3
     compatibleRuntimes:
       - nodejs16.x
+      - nodejs18.x
     licenseInfo: Apache License 2.0
     retain: false
 
@@ -104,12 +105,12 @@ functions:
     memorySize: 5120
     package:
       individually: true
-      exclude:
-        - node_modules/**
-        - docs/**
-        - .idea/**
-        - bin/darwin/**
-        - coverage/**
+      patterns:
+        - '!node_modules/**'
+        - '!docs/**'
+        - '!.idea/**'
+        - '!bin/darwin/**'
+        - '!coverage/**'
     handler: src/index.handler
     layers:
       - { Ref: SharpLambdaLayer }
